@@ -7,6 +7,7 @@ use App\Filament\Resources\DeviceResource\Widgets\DeviceGroupsTable;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Redis;
 
 class EditDevice extends EditRecord
 {

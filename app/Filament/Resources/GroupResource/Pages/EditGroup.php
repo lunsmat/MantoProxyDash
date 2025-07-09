@@ -6,6 +6,7 @@ use App\Filament\Resources\GroupResource;
 use App\Filament\Resources\GroupResource\Widgets\GroupDevicesTable;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Illuminate\Support\Facades\Cache;
 
 class EditGroup extends EditRecord
 {

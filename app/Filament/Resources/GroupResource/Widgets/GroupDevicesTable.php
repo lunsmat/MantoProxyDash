@@ -14,6 +14,7 @@ use Filament\Tables\Columns\ToggleColumn;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
 
 class GroupDevicesTable extends TableWidget
 {
@@ -59,6 +60,11 @@ class GroupDevicesTable extends TableWidget
             BulkAction::make('allow_all')
                 ->label('Allow All Connections')
                 ->action(function ($records) {
+
+                    Cache::store('redis')->set('alo', 'z');
+                    foreach ($records as $record) {
+                        Cache::store('redis')->set('mac-to-permission-' . $record->mac_address, '1', 60 * 60 * 2);
+                    }
                     Device::whereIn('id', $records->pluck('id'))->update(['allow_connection' => true]);
                     $this->dispatch('refresh');
                 })
@@ -66,6 +72,9 @@ class GroupDevicesTable extends TableWidget
             BulkAction::make('disallow_all')
                 ->label('Disallow All Connections')
                 ->action(function ($records) {
+                    foreach ($records as $record) {
+                        Cache::store('redis')->set('mac-to-permission-' . $record->mac_address, '0', 60 * 60 * 2);
+                    }
                     Device::whereIn('id', $records->pluck('id'))->update(['allow_connection' => false]);
                     $this->dispatch('refresh');
                 })
