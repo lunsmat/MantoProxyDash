@@ -4,6 +4,7 @@ namespace App\Filament\Resources\DeviceResource\Pages;
 
 use App\Filament\Resources\DeviceResource;
 use App\Filament\Resources\DeviceResource\Widgets\DeviceGroupsTable;
+use App\Filament\Resources\DeviceResource\Widgets\UrlFilterTable;
 use Filament\Actions;
 use Filament\Resources\Pages\EditRecord;
 use Illuminate\Support\Facades\Cache;
@@ -23,6 +24,7 @@ class EditDevice extends EditRecord
     protected function getFooterWidgets(): array
     {
         return [
+            UrlFilterTable::make(),
             DeviceGroupsTable::make(),
         ];
     }

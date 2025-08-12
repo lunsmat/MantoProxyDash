@@ -17,4 +17,9 @@ class Group extends Model
     {
         return $this->belongsToMany(Device::class, 'group_devices', 'group_id', 'device_id');
     }
+
+    public function filters(): BelongsToMany
+    {
+        return $this->belongsToMany(UrlFilter::class, 'url_filter_groups', 'group_id', 'url_filter_id');
+    }
 }

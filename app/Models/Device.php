@@ -20,6 +20,11 @@ class Device extends Model
         return $this->belongsToMany(Group::class, 'group_devices', 'device_id', 'group_id');
     }
 
+    public function filters(): BelongsToMany
+    {
+        return $this->belongsToMany(UrlFilter::class, 'url_filter_devices', 'device_id', 'url_filter_id');
+    }
+
     public function logs()
     {
         return $this->hasMany(DeviceLog::class);
