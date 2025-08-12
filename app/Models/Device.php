@@ -20,6 +20,11 @@ class Device extends Model
         return $this->belongsToMany(Group::class, 'group_devices', 'device_id', 'group_id');
     }
 
+    public function logs()
+    {
+        return $this->hasMany(DeviceLog::class);
+    }
+
     protected static function boot()
     {
         parent::boot();

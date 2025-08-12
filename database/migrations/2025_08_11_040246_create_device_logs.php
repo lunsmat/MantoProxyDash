@@ -11,16 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('group_devices', function (Blueprint $table) {
-            $table->integerIncrements('id')->primary();
+        Schema::create('device_logs', function (Blueprint $table) {
+            $table->id();
 
-            $table->integer('group_id')->unsigned();
             $table->integer('device_id')->unsigned();
-
-            $table->foreign('group_id')->references('id')->on('groups')->onDelete('cascade');
-            $table->foreign('device_id')->references('id')->on('devices')->onDelete('cascade');
-
+            $table->string('http_method');
+            $table->string('http_url');
+            $table->text('http_headers');
+            $table->text('http_body');
             $table->timestamps();
+
+            $table->foreign('device_id')
+                ->references('id')->on('devices')
+                ->onDelete('cascade')->onUpdate('cascade');
         });
     }
 
@@ -29,6 +32,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('group_devices');
+        Schema::dropIfExists('device_logs');
     }
 };
