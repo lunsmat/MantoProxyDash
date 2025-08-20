@@ -2,11 +2,20 @@
 
 namespace App\Filament\Resources;
 
+use Filament\Schemas\Schema;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Actions\EditAction;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteBulkAction;
+use App\Filament\Resources\UrlFilters\Pages\ListUrlFilters;
+use App\Filament\Resources\UrlFilters\Pages\CreateUrlFilter;
+use App\Filament\Resources\UrlFilters\Pages\EditUrlFilter;
 use App\Filament\Resources\UrlFilterResource\Pages;
 use App\Filament\Resources\UrlFilterResource\RelationManagers;
 use App\Models\UrlFilter;
 use Filament\Forms;
-use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -17,16 +26,16 @@ class UrlFilterResource extends Resource
 {
     protected static ?string $model = UrlFilter::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
 
-    public static function form(Form $form): Form
+    public static function form(Schema $schema): Schema
     {
-        return $form
-            ->schema([
-                Forms\Components\TextInput::make('name')
+        return $schema
+            ->components([
+                TextInput::make('name')
                     ->required()
                     ->label('Filter Name'),
-                Forms\Components\Textarea::make('filters')
+                Textarea::make('filters')
                     ->required()
                     ->columnSpanFull()
                     ->rows(10)
@@ -38,7 +47,7 @@ class UrlFilterResource extends Resource
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('name')
+                TextColumn::make('name')
                     ->searchable()
                     ->sortable()
                     ->label('Filter Name'),
@@ -46,12 +55,12 @@ class UrlFilterResource extends Resource
             ->filters([
                 //
             ])
-            ->actions([
-                Tables\Actions\EditAction::make(),
+            ->recordActions([
+                EditAction::make(),
             ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+            ->toolbarActions([
+                BulkActionGroup::make([
+                    DeleteBulkAction::make(),
                 ]),
             ]);
     }
@@ -66,9 +75,9 @@ class UrlFilterResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListUrlFilters::route('/'),
-            'create' => Pages\CreateUrlFilter::route('/create'),
-            'edit' => Pages\EditUrlFilter::route('/{record}/edit'),
+            'index' => ListUrlFilters::route('/'),
+            'create' => CreateUrlFilter::route('/create'),
+            'edit' => EditUrlFilter::route('/{record}/edit'),
         ];
     }
 }
