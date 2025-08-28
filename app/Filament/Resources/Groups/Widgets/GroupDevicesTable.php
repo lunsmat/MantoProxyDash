@@ -6,7 +6,8 @@ use Filament\Actions\BulkAction;
 use Filament\Actions\DetachAction;
 use App\Models\Device;
 use App\Models\Group;
-use Filament\Tables\Actions\Action;
+use Filament\Actions\Action;
+// use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Widgets\TableWidget;
@@ -19,7 +20,7 @@ class GroupDevicesTable extends TableWidget
     protected static ?string $model = Device::class;
     public ?Group $record = null;
     protected int | string | array $columnSpan = 'full';
-    protected static ?string $heading = 'Devices';
+    protected static ?string $heading = 'Dispositivos';
 
     protected function getTableQuery(): Builder | Relation
     {
@@ -37,17 +38,27 @@ class GroupDevicesTable extends TableWidget
                 ->sortable()
                 ->searchable(),
             TextColumn::make('name')
-                ->label('Device Name')
+                ->label('Nome do Dispositivo')
                 ->sortable()
                 ->searchable(),
             TextColumn::make('mac_address')
-                ->label('MAC Address')
+                ->label('Endereço MAC')
                 ->sortable()
                 ->searchable(),
             ToggleColumn::make('allow_connection')
-                ->label('Allow Connection')
+                ->label('Permitir Conexão')
                 ->sortable()
                 ->searchable()
+                ->onIcon('heroicon-o-check-circle')
+                ->offIcon('heroicon-o-x-circle')
+                ->updateStateUsing(function ($record, $state) {
+                    $record->allow_connection = $state;
+                    $record->save();
+
+                    Cache::store('redis')->delete('mac-to-permission-' . $record->mac_address);
+
+                    return $state ? true : false;
+                })
                 ->toggleable(),
         ];
     }
@@ -56,23 +67,66 @@ class GroupDevicesTable extends TableWidget
     {
         return [
             BulkAction::make('allow_all')
-                ->label('Allow All Connections')
+                ->label('Permitir acesso a todos selecionados')
                 ->action(function ($records) {
-
-                    Cache::store('redis')->set('alo', 'z');
+                    $cacheDelete = [];
                     foreach ($records as $record) {
-                        Cache::store('redis')->set('mac-to-permission-' . $record->mac_address, '1', 60 * 60 * 2);
+                        $cacheDelete[] = 'mac-to-permission-' . $record->mac_address;
                     }
+                    Cache::store('redis')->deleteMultiple($cacheDelete);
                     Device::whereIn('id', $records->pluck('id'))->update(['allow_connection' => true]);
                     $this->dispatch('refresh');
                 })
                 ->requiresConfirmation(),
             BulkAction::make('disallow_all')
-                ->label('Disallow All Connections')
+                ->label('Negar acesso a todos selecionados')
                 ->action(function ($records) {
+                    $cacheDelete = [];
                     foreach ($records as $record) {
-                        Cache::store('redis')->set('mac-to-permission-' . $record->mac_address, '0', 60 * 60 * 2);
+                        $cacheDelete[] = 'mac-to-permission-' . $record->mac_address;
                     }
+                    Cache::store('redis')->deleteMultiple($cacheDelete);
+                    Device::whereIn('id', $records->pluck('id'))->update(['allow_connection' => false]);
+                    $this->dispatch('refresh');
+                })
+                ->requiresConfirmation(),
+        ];
+    }
+
+    protected function getTableHeaderActions(): array
+    {
+        return [
+            // Permitir Acesso
+            Action::make('allow_all')
+                ->label('Permitir Acesso a Todos')
+                ->action(function () {
+                    $records = Device::whereHas('groups', function (Builder $query) {
+                        $query->where('group_id', $this->record->id);
+                    })->get();
+
+                    $cacheDelete = [];
+                    foreach ($records as $record) {
+                        $cacheDelete[] = 'mac-to-permission-' . $record->mac_address;
+                    }
+                    Cache::store('redis')->deleteMultiple($cacheDelete);
+                    Device::whereIn('id', $records->pluck('id'))->update(['allow_connection' => true]);
+                    $this->dispatch('refresh');
+                })
+                ->requiresConfirmation(),
+
+            // Negar Acesso
+            Action::make('disallow_all')
+                ->label('Negar Acesso a Todos')
+                ->action(function () {
+                    $records = Device::whereHas('groups', function (Builder $query) {
+                        $query->where('group_id', $this->record->id);
+                    })->get();
+
+                    $cacheDelete = [];
+                    foreach ($records as $record) {
+                        $cacheDelete[] = 'mac-to-permission-' . $record->mac_address;
+                    }
+                    Cache::store('redis')->deleteMultiple($cacheDelete);
                     Device::whereIn('id', $records->pluck('id'))->update(['allow_connection' => false]);
                     $this->dispatch('refresh');
                 })
@@ -84,7 +138,7 @@ class GroupDevicesTable extends TableWidget
     {
         return [
             DetachAction::make('detach')
-                ->label('Detach Selected Devices')
+                ->label('Desvincular Dispositivos Selecionados')
                 ->action(function ($record) {
                     $this->record->devices()->detach($record);
                     $this->dispatch('refresh');

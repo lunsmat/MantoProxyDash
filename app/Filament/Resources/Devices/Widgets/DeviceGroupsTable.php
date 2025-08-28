@@ -16,7 +16,7 @@ class DeviceGroupsTable extends TableWidget
     protected static ?string $model = Group::class;
     public ?Device $record = null;
     protected int | string | array $columnSpan = 'full';
-    protected static ?string $heading = 'Groups';
+    protected static ?string $heading = 'Grupos';
 
     protected function getTableQuery(): Builder | Relation
     {
@@ -34,11 +34,11 @@ class DeviceGroupsTable extends TableWidget
                 ->sortable()
                 ->searchable(),
             TextColumn::make('name')
-                ->label('Group Name')
+                ->label('Nome do Grupo')
                 ->sortable()
                 ->searchable(),
             TextColumn::make('description')
-                ->label('Description')
+                ->label('Descrição')
                 ->sortable()
                 ->searchable(),
         ];
@@ -48,7 +48,7 @@ class DeviceGroupsTable extends TableWidget
     {
         return [
             DetachAction::make('detach')
-                ->label('Detach Selected Groups')
+                ->label('Desvincular Grupos Selecionados')
                 ->action(function ($record) {
                     $this->record->groups()->detach($record);
                     $this->dispatch('refresh');

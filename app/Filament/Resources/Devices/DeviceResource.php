@@ -7,29 +7,32 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Select;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Tables\Columns\BooleanColumn;
 use Filament\Actions\EditAction;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\Devices\Pages\ListDevices;
 use App\Filament\Resources\Devices\Pages\CreateDevice;
 use App\Filament\Resources\Devices\Pages\EditDevice;
-use App\Filament\Resources\DeviceResource\Pages;
-use App\Filament\Resources\DeviceResource\RelationManagers;
 use App\Models\Device;
 use App\Models\Group;
-use Filament\Forms;
 use Filament\Resources\Resource;
-use Filament\Tables;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Cache;
 
 class DeviceResource extends Resource
 {
     protected static ?string $model = Device::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::ComputerDesktop;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $modelLabel = 'Dispositivo';
+
+    protected static ?string $pluralModelLabel = 'Dispositivos';
+
 
     public static function form(Schema $schema): Schema
     {
@@ -43,22 +46,24 @@ class DeviceResource extends Resource
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255)
-                    ->label('Device Name'),
+                    ->label('Nome do Dispositivo'),
                 TextInput::make('mac_address')
                     ->required()
                     ->maxLength(17)
-                    ->label('MAC Address')
+                    ->label('Endereço MAC')
                     ->unique(ignoreRecord: true),
                 Toggle::make('allow_connection')
+                    ->onIcon('heroicon-o-check-circle')
+                    ->offIcon('heroicon-o-x-circle')
                     ->default(true)
-                    ->label('Allow Connection'),
+                    ->label('Permitir Conexão'),
 
                 Select::make('groups')
                     ->multiple()
                     ->relationship('groups', 'name')
                     ->preload()
                     ->options($groups)
-                    ->label('Groups'),
+                    ->label('Grupos'),
             ])->columns(1);
     }
 
@@ -69,23 +74,31 @@ class DeviceResource extends Resource
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable()
-                    ->label('Device Name'),
+                    ->label('Nome do Dispositivo'),
                 TextColumn::make('mac_address')
                     ->searchable()
                     ->sortable()
-                    ->label('MAC Address'),
-                BooleanColumn::make('allow_connection')
-                    ->label('Allow Connection')
-                    ->trueIcon('heroicon-o-check-circle')
-                    ->falseIcon('heroicon-o-x-circle'),
+                    ->label('Endereço MAC'),
+                ToggleColumn::make('allow_connection')
+                    ->label('Permitir Conexão')
+                    ->onIcon('heroicon-o-check-circle')
+                    ->offIcon('heroicon-o-x-circle')
+                    ->action(function ($record) {
+                        $record->update([
+                            'allow_connection' => !$record->allow_connection,
+                        ]);
+
+                        Cache::store('redis')->delete('mac-to-permission-' . $record->mac_address);
+                    })
+                    ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
-                    ->label('Created At'),
+                    ->label('Criado Em'),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
-                    ->label('Updated At'),
+                    ->label('Atualizado Em'),
             ])
             ->filters([
                 //

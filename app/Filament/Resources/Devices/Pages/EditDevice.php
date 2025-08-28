@@ -32,8 +32,6 @@ class EditDevice extends EditRecord
 
     protected function afterSave(): void
     {
-        Cache::store('redis')->set('mac-to-permission-' . $this->record->mac_address, $this->record->allow_connection ? '1' : '0',
-            60 * 60 * 2 // Cache for 2 hours
-        );
+        Cache::store('redis')->delete('mac-to-permission-' . $this->record->mac_address);
     }
 }

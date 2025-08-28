@@ -3,6 +3,8 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+
+use App\Enums\UserRole;
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -22,6 +24,7 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'role',
     ];
 
     /**
@@ -33,6 +36,11 @@ class User extends Authenticatable
         'password',
         'remember_token',
     ];
+
+    protected function getRoleLabelAttribute()
+    {
+        return UserRole::fromLabel($this->role)->getLabelName();
+    }
 
     /**
      * Get the attributes that should be cast.

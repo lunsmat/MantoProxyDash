@@ -18,7 +18,7 @@ class UrlFilterTable extends TableWidget
     protected static ?string $model = UrlFilter::class;
     public ?Device $record = null;
     protected int | string | array $columnSpan = 'full';
-    protected static ?string $heading = 'Filters';
+    protected static ?string $heading = 'Filtros';
 
     protected function getTableQuery(): Builder | Relation
     {
@@ -35,12 +35,14 @@ class UrlFilterTable extends TableWidget
                 ->sortable()
                 ->searchable(),
             TextColumn::make('name')
-                ->label('Group Name')
+                ->label('Nome do Grupo')
                 ->sortable()
                 ->searchable(),
             ToggleColumn::make('enabled')
                 ->state(fn ($record) => $ids ? in_array($record->id, $ids) : false)
-                ->label('Enabled')
+                ->label('Habilitado')
+                ->onIcon('heroicon-o-check-circle')
+                ->offIcon('heroicon-o-x-circle')
                 ->updateStateUsing(function ($record, $state) {
                     if ($state) {
                         $this->record->filters()->attach($record->id);

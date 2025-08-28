@@ -19,6 +19,7 @@ use App\Models\Device;
 use App\Models\Group;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -28,7 +29,13 @@ class GroupResource extends Resource
 {
     protected static ?string $model = Group::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::ServerStack;
+
+    protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?string $modelLabel = 'Grupo';
+
+    protected static ?string $pluralModelLabel = 'Grupos';
 
     public static function form(Schema $schema): Schema
     {
@@ -42,16 +49,16 @@ class GroupResource extends Resource
                 TextInput::make('name')
                     ->required()
                     ->maxLength(255)
-                    ->label('Group Name'),
+                    ->label('Nome do Grupo'),
                 Textarea::make('description')
                     ->maxLength(65535)
-                    ->label('Description'),
+                    ->label('Descrição'),
                 Select::make('devices')
                     ->multiple()
                     ->relationship('devices', 'name')
                     ->preload()
                     ->options($devices)
-                    ->label('Devices'),
+                    ->label('Dispositivos'),
             ])->columns(1);
     }
 
@@ -61,15 +68,19 @@ class GroupResource extends Resource
             ->columns([
                 TextColumn::make('name')
                     ->searchable()
+                    ->label('Nome do Grupo')
                     ->sortable(),
                 TextColumn::make('description')
                     ->searchable()
+                    ->label('Descrição')
                     ->sortable(),
                 TextColumn::make('created_at')
                     ->dateTime()
+                    ->label('Criado Em')
                     ->sortable(),
                 TextColumn::make('updated_at')
                     ->dateTime()
+                    ->label('Atualizado Em')
                     ->sortable(),
             ])
             ->filters([

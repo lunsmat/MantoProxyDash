@@ -15,16 +15,24 @@ use App\Filament\Resources\DeviceLogResource\RelationManagers;
 use App\Models\DeviceLog;
 use Filament\Forms;
 use Filament\Resources\Resource;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class DeviceLogResource extends Resource
 {
     protected static ?string $model = DeviceLog::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::ClipboardDocumentList;
+
+    protected static ?string $recordTitleAttribute = 'device.name';
+
+    protected static ?string $modelLabel = 'Log';
+
+    protected static ?string $pluralModelLabel = 'Logs do acessos';
 
     public static function form(Schema $schema): Schema
     {
@@ -41,34 +49,38 @@ class DeviceLogResource extends Resource
                 TextColumn::make('device.mac_address')
                     ->searchable()
                     ->sortable()
-                    ->label('Device Mac'),
+                    ->label('Endereço MAC'),
+                TextColumn::make('device.name')
+                    ->searchable()
+                    ->sortable()
+                    ->label('Nome do Dispositivo'),
                 TextColumn::make('http_method')
                     ->searchable()
                     ->sortable()
-                    ->label('HTTP Method'),
+                    ->label('Método HTTP'),
                 TextColumn::make('http_url')
                     ->searchable()
                     ->sortable()
-                    ->label('HTTP URL'),
+                    ->label('URL HTTP'),
                 TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
-                    ->label('Created At'),
+                    ->label('Criado Em'),
                 TextColumn::make('updated_at')
                     ->dateTime()
                     ->sortable()
-                    ->label('Updated At'),
+                    ->label('Atualizado Em'),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
-                EditAction::make(),
+                // EditAction::make(),
             ])
             ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
+                // BulkActionGroup::make([
+                //     // DeleteBulkAction::make(),
+                // ]),
             ]);
     }
 
@@ -83,8 +95,8 @@ class DeviceLogResource extends Resource
     {
         return [
             'index' => ListDeviceLogs::route('/'),
-            'create' => CreateDeviceLog::route('/create'),
-            'edit' => EditDeviceLog::route('/{record}/edit'),
+            // 'create' => CreateDeviceLog::route('/create'),
+            // 'edit' => EditDeviceLog::route('/{record}/edit'),
         ];
     }
 }

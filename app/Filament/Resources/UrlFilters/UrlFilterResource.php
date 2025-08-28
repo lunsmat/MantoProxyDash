@@ -19,6 +19,7 @@ use Filament\Forms;
 use Filament\Forms\Components\CodeEditor;
 use Filament\Forms\Components\CodeEditor\Enums\Language;
 use Filament\Resources\Resource;
+use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
@@ -28,7 +29,11 @@ class UrlFilterResource extends Resource
 {
     protected static ?string $model = UrlFilter::class;
 
-    protected static string | \BackedEnum | null $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static string | \BackedEnum | null $navigationIcon = Heroicon::ShieldCheck;
+
+    protected static ?string $modelLabel = 'Filtro';
+
+    protected static ?string $pluralModelLabel = 'Filtros';
 
     public static function form(Schema $schema): Schema
     {
@@ -36,12 +41,12 @@ class UrlFilterResource extends Resource
             ->components([
                 TextInput::make('name')
                     ->required()
-                    ->label('Filter Name'),
+                    ->label('Nome do Filtro'),
                 CodeEditor::make('filters')
                     ->required()
                     ->language(Language::Yaml)
                     ->columnSpanFull()
-                    ->label('Filters'),
+                    ->label('Filtros'),
             ]);
     }
 
@@ -52,7 +57,7 @@ class UrlFilterResource extends Resource
                 TextColumn::make('name')
                     ->searchable()
                     ->sortable()
-                    ->label('Filter Name'),
+                    ->label('Nome do Filtro'),
             ])
             ->filters([
                 //
