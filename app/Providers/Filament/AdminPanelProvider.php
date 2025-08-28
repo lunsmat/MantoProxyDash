@@ -2,6 +2,7 @@
 
 namespace App\Providers\Filament;
 
+use Filament\Auth\Pages\EditProfile;
 use Filament\Enums\ThemeMode;
 use Filament\Pages\Dashboard;
 use Filament\Widgets\AccountWidget;
@@ -29,7 +30,7 @@ class AdminPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('admin')
-            ->path('admin')
+            ->path('/')
             ->login()
             ->colors([
                 'primary' => Color::Blue,
@@ -58,6 +59,7 @@ class AdminPanelProvider extends PanelProvider
             ->authMiddleware([
                 Authenticate::class,
             ])->defaultThemeMode(ThemeMode::Light)
-            ->brandName('MantoProxy');
+            ->brandName('MantoProxy')
+            ->profile(EditProfile::class);
     }
 }

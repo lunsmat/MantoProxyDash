@@ -19,6 +19,7 @@ use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 class DeviceResource extends Resource
@@ -127,5 +128,10 @@ class DeviceResource extends Resource
             'create' => CreateDevice::route('/create'),
             'edit' => EditDevice::route('/{record}/edit'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return Auth::user()->is_admin;
     }
 }

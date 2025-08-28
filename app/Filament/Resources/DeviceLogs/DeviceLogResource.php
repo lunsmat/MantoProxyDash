@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\DeviceLogs;
 
+use App\Enums\UserRole;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Actions\EditAction;
@@ -21,6 +22,7 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class DeviceLogResource extends Resource
 {
@@ -98,5 +100,10 @@ class DeviceLogResource extends Resource
             // 'create' => CreateDeviceLog::route('/create'),
             // 'edit' => EditDeviceLog::route('/{record}/edit'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return Auth::user()->is_admin;
     }
 }

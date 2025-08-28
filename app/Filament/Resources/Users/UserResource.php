@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class UserResource extends Resource
 {
@@ -50,5 +51,10 @@ class UserResource extends Resource
             'create' => CreateUser::route('/create'),
             'edit' => EditUser::route('/{record}/edit'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return Auth::user()->is_admin;
     }
 }

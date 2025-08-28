@@ -42,6 +42,11 @@ class User extends Authenticatable
         return UserRole::fromLabel($this->role)->getLabelName();
     }
 
+    protected function getIsAdminAttribute()
+    {
+        return UserRole::fromLabel($this->role) === UserRole::Admin;
+    }
+
     /**
      * Get the attributes that should be cast.
      *

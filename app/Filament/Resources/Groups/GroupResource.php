@@ -15,15 +15,19 @@ use App\Filament\Resources\Groups\Pages\CreateGroup;
 use App\Filament\Resources\Groups\Pages\EditGroup;
 use App\Filament\Resources\GroupResource\Pages;
 use App\Filament\Resources\GroupResource\RelationManagers;
+use App\Filament\Resources\Groups\Pages\ViewGroup;
 use App\Models\Device;
 use App\Models\Group;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class GroupResource extends Resource
 {
@@ -64,6 +68,18 @@ class GroupResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $recordActions = [
+            ViewAction::make(),
+        ];
+        $toolbarActions = [];
+
+        if (Auth::user()->is_admin) {
+            $recordActions[] = EditAction::make();
+            $toolbarActions[] = BulkActionGroup::make([
+                DeleteBulkAction::make(),
+            ]);
+        }
+
         return $table
             ->columns([
                 TextColumn::make('name')
@@ -86,14 +102,8 @@ class GroupResource extends Resource
             ->filters([
                 //
             ])
-            ->recordActions([
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->recordActions($recordActions)
+            ->toolbarActions($toolbarActions);
     }
 
     public static function getRelations(): array
@@ -109,6 +119,22 @@ class GroupResource extends Resource
             'index' => ListGroups::route('/'),
             'create' => CreateGroup::route('/create'),
             'edit' => EditGroup::route('/{record}/edit'),
+            'view' => ViewGroup::route('/{record}'),
         ];
+    }
+
+    public static function canCreate(): bool
+    {
+        return Auth::user()->is_admin;
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return Auth::user()->is_admin;
+    }
+
+    public static function canDelete(Model $record): bool
+    {
+        return Auth::user()->is_admin;
     }
 }

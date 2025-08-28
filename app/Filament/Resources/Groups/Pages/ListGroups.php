@@ -6,6 +6,7 @@ use Filament\Actions\CreateAction;
 use App\Filament\Resources\Groups\GroupResource;
 use Filament\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Support\Facades\Auth;
 
 class ListGroups extends ListRecords
 {
@@ -13,8 +14,12 @@ class ListGroups extends ListRecords
 
     protected function getHeaderActions(): array
     {
-        return [
-            CreateAction::make(),
-        ];
+        $actions = [];
+
+        if (Auth::user()->is_admin) {
+            $actions[] = CreateAction::make();
+        }
+
+        return $actions;
     }
 }
