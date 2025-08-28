@@ -34,14 +34,14 @@
         <div class="filters-area">
             <h2 class="text-lg font-medium">Filtros</h2>
             <div class="filters-container">
-                <div class="filter">
-                    @foreach ($filters as $filter)
+                @foreach ($filters as $filter)
+                    <div class="filter">
                         <span>{{ $filter->name }}</span>
                         <button wire:click="updateFilter({{ $filter->id }}, {{ in_array($filter->id, $enabledFilters) ? 'false' : 'true' }})" class="{{ in_array($filter->id, $enabledFilters) ? 'active' : '' }}">
                             {{ in_array($filter->id, $enabledFilters) ? 'Ativado' : 'Desativado' }}
                         </button>
-                    @endforeach
-                </div>
+                    </div>
+                @endforeach
             </div>
         </div>
     </main>
