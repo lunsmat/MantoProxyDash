@@ -15,6 +15,7 @@ use App\Filament\Resources\UrlFilters\Pages\EditUrlFilter;
 use App\Filament\Resources\UrlFilterResource\Pages;
 use App\Filament\Resources\UrlFilterResource\RelationManagers;
 use App\Models\UrlFilter;
+use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Forms\Components\CodeEditor;
 use Filament\Forms\Components\CodeEditor\Enums\Language;
@@ -23,7 +24,9 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\Auth;
 
 class UrlFilterResource extends Resource
 {
@@ -52,6 +55,18 @@ class UrlFilterResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $toolbarActions = [];
+        $recordActions = [
+            ViewAction::make(),
+        ];
+
+        if (Auth::user()->is_admin) {
+            $recordActions[] = EditAction::make();
+            $toolbarActions[] = BulkActionGroup::make([
+                DeleteBulkAction::make(),
+            ]);
+        }
+
         return $table
             ->columns([
                 TextColumn::make('name')
@@ -62,14 +77,8 @@ class UrlFilterResource extends Resource
             ->filters([
                 //
             ])
-            ->recordActions([
-                EditAction::make(),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->recordActions($recordActions)
+            ->toolbarActions($toolbarActions);
     }
 
     public static function getRelations(): array
@@ -86,5 +95,10 @@ class UrlFilterResource extends Resource
             'create' => CreateUrlFilter::route('/create'),
             'edit' => EditUrlFilter::route('/{record}/edit'),
         ];
+    }
+
+    public static function canEdit(Model $record): bool
+    {
+        return Auth::user()->is_admin;
     }
 }

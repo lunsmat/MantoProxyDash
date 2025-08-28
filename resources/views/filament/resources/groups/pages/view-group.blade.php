@@ -5,7 +5,7 @@
 
         <div class="headers-button">
             <button wire:click="enableAll">Habilitar Todos</button>
-            <button wire:click="disableAll">Desabilitar Todos</button>
+            <button wire:click="disableAll" class="deactivate">Desabilitar Todos</button>
         </div>
     </header>
 

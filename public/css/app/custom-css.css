@@ -46,7 +46,7 @@
 }
 
 .group-header .headers-button button {
-    background-color: #4169E1;
+    background-color: #3CB371;
     padding: 0.5rem 1rem;
     border: none;
     border-radius: 0.5rem;
@@ -55,8 +55,16 @@
     transition: background-color 0.3s;
 }
 
+.group-header .headers-button button.deactivate {
+    background-color: #FF6347;
+}
+
 .group-header .headers-button button:hover {
     background-color: #2e8b5c;
+}
+
+.group-header .headers-button button.deactivate:hover {
+    background-color: #e55347;
 }
 
 .devices-container {
