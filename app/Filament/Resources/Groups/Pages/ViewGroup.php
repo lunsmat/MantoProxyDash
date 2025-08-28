@@ -6,6 +6,7 @@ use App\Filament\Resources\Groups\GroupResource;
 use App\Models\Group;
 use App\Models\UrlFilter;
 use Filament\Resources\Pages\Page;
+use Illuminate\Support\Facades\Cache;
 
 class ViewGroup extends Page
 {
@@ -45,6 +46,7 @@ class ViewGroup extends Page
         if ($device) {
             $device->allow_connection = $value;
             $device->save();
+            Cache::store('redis')->delete('mac-to-permission-' . $device->mac_address);
         }
     }
 
@@ -54,6 +56,14 @@ class ViewGroup extends Page
         if ($record) {
             $record->devices()->update(['allow_connection' => true]);
             $this->devices = $record->devices()->orderBy('name')->get();
+
+            $deletes = [];
+
+            foreach ($this->devices as $device) {
+                $deletes[] = 'mac-to-permission-' . $device->mac_address;
+            }
+
+            Cache::store('redis')->deleteMultiple($deletes);
         }
     }
 
@@ -63,6 +73,13 @@ class ViewGroup extends Page
         if ($record) {
             $record->devices()->update(['allow_connection' => false]);
             $this->devices = $record->devices()->orderBy('name')->get();
+
+            $deletes = [];
+            foreach ($this->devices as $device) {
+                $deletes[] = 'mac-to-permission-' . $device->mac_address;
+            }
+
+            Cache::store('redis')->deleteMultiple($deletes);
         }
     }
 
