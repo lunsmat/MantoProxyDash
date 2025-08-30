@@ -2,11 +2,9 @@
 
 namespace App\Filament\Resources\Groups\Widgets;
 
-use App\Models\Device;
 use App\Models\Group;
 use App\Models\UrlFilter;
-use Filament\Actions\Action;
-use Filament\Tables\Actions\DetachAction;
+use App\Services\GroupService;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Widgets\TableWidget;
@@ -19,6 +17,13 @@ class UrlFilterTable extends TableWidget
     public ?Group $record = null;
     protected int | string | array $columnSpan = 'full';
     protected static ?string $heading = 'Filtros';
+
+    private GroupService $groupService;
+
+    public function __construct()
+    {
+        $this->groupService = new GroupService();
+    }
 
     protected function getTableQuery(): Builder | Relation
     {
@@ -45,9 +50,9 @@ class UrlFilterTable extends TableWidget
                 ->offIcon('heroicon-o-x-circle')
                 ->updateStateUsing(function ($record, $state) {
                     if ($state) {
-                        $this->record->filters()->attach($record->id);
+                        $this->groupService->attachFilter($this->record, $record->id);
                     } else {
-                        $this->record->filters()->detach($record->id);
+                        $this->groupService->detachFilter($this->record, $record->id);
                     }
 
                     return $state ? true : false;

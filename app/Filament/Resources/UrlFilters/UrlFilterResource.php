@@ -47,7 +47,23 @@ class UrlFilterResource extends Resource
                     ->label('Nome do Filtro'),
                 CodeEditor::make('filters')
                     ->required()
-                    ->language(Language::Yaml)
+                    ->dehydrateStateUsing(function ($state) {
+                        $state = trim($state); // trim empty lines
+                        $state = explode("\n", $state); // explode into array
+
+                        foreach ($state as $key => $item) {
+                            if (empty(trim($item))) {
+                                unset($state[$key]);
+                                continue;
+                            }
+                            $state[$key] = preg_replace('/^https?:\/\//', '', trim($item)); // remove http:// or https:// and trim spaces
+                            $state[$key] = preg_replace('/^www\./', '', trim($item)); // remove www. and trim spaces
+                            $state[$key] = preg_replace('/\/.*$/', '', $state[$key]); // remove everything after /
+                        }
+
+                        return join("\n", $state);
+
+                    })->language(Language::Yaml)
                     ->columnSpanFull()
                     ->label('Filtros'),
             ]);

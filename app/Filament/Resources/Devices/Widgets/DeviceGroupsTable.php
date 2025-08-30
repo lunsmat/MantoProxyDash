@@ -5,7 +5,7 @@ namespace App\Filament\Resources\Devices\Widgets;
 use Filament\Actions\DetachAction;
 use App\Models\Device;
 use App\Models\Group;
-use Filament\Actions\Action;
+use App\Services\DeviceService;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Relations\Relation;
@@ -17,6 +17,13 @@ class DeviceGroupsTable extends TableWidget
     public ?Device $record = null;
     protected int | string | array $columnSpan = 'full';
     protected static ?string $heading = 'Grupos';
+
+    private DeviceService $deviceService;
+
+    public function __construct()
+    {
+        $this->deviceService = new DeviceService();
+    }
 
     protected function getTableQuery(): Builder | Relation
     {
@@ -50,7 +57,7 @@ class DeviceGroupsTable extends TableWidget
             DetachAction::make('detach')
                 ->label('Desvincular Grupos Selecionados')
                 ->action(function ($record) {
-                    $this->record->groups()->detach($record);
+                    $this->deviceService->detachGroup($this->record, $record->id);
                     $this->dispatch('refresh');
                 })
                 ->requiresConfirmation(),

@@ -3,10 +3,8 @@
 namespace App\Filament\Resources\Devices\Widgets;
 
 use App\Models\Device;
-use App\Models\Group;
 use App\Models\UrlFilter;
-use Filament\Actions\Action;
-use Filament\Tables\Actions\DetachAction;
+use App\Services\DeviceService;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\ToggleColumn;
 use Filament\Widgets\TableWidget;
@@ -19,6 +17,13 @@ class UrlFilterTable extends TableWidget
     public ?Device $record = null;
     protected int | string | array $columnSpan = 'full';
     protected static ?string $heading = 'Filtros';
+
+    private DeviceService $deviceService;
+
+    public function __construct()
+    {
+        $this->deviceService = new DeviceService();
+    }
 
     protected function getTableQuery(): Builder | Relation
     {
@@ -45,9 +50,9 @@ class UrlFilterTable extends TableWidget
                 ->offIcon('heroicon-o-x-circle')
                 ->updateStateUsing(function ($record, $state) {
                     if ($state) {
-                        $this->record->filters()->attach($record->id);
+                        $this->deviceService->attachFilter($this->record, $record->id);
                     } else {
-                        $this->record->filters()->detach($record->id);
+                        $this->deviceService->detachFilter($this->record, $record->id);
                     }
 
                     return $state ? true : false;

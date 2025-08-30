@@ -6,14 +6,19 @@ use Filament\Actions\DeleteAction;
 use App\Filament\Resources\Devices\DeviceResource;
 use App\Filament\Resources\Devices\Widgets\DeviceGroupsTable;
 use App\Filament\Resources\Devices\Widgets\UrlFilterTable;
-use Filament\Actions;
+use App\Services\DeviceService;
 use Filament\Resources\Pages\EditRecord;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Redis;
 
 class EditDevice extends EditRecord
 {
     protected static string $resource = DeviceResource::class;
+
+    private DeviceService $deviceService;
+
+    public function __construct()
+    {
+        $this->deviceService = new DeviceService();
+    }
 
     protected function getHeaderActions(): array
     {
@@ -32,6 +37,11 @@ class EditDevice extends EditRecord
 
     protected function afterSave(): void
     {
-        Cache::store('redis')->delete('mac-to-permission-' . $this->record->mac_address);
+        $this->deviceService->clearPermissionCache($this->record);
+    }
+
+    protected function beforeSave(): void
+    {
+        $this->deviceService->clearDeviceIdFromMac($this->record->mac_address);
     }
 }

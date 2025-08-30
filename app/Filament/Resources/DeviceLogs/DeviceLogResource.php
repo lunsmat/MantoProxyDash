@@ -2,26 +2,13 @@
 
 namespace App\Filament\Resources\DeviceLogs;
 
-use App\Enums\UserRole;
 use Filament\Schemas\Schema;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Actions\EditAction;
-use Filament\Actions\BulkActionGroup;
-use Filament\Actions\DeleteBulkAction;
 use App\Filament\Resources\DeviceLogs\Pages\ListDeviceLogs;
-use App\Filament\Resources\DeviceLogs\Pages\CreateDeviceLog;
-use App\Filament\Resources\DeviceLogs\Pages\EditDeviceLog;
-use App\Filament\Resources\DeviceLogResource\Pages;
-use App\Filament\Resources\DeviceLogResource\RelationManagers;
 use App\Models\DeviceLog;
-use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
-use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\Auth;
 
 class DeviceLogResource extends Resource
@@ -77,12 +64,10 @@ class DeviceLogResource extends Resource
                 //
             ])
             ->recordActions([
-                // EditAction::make(),
+                //
             ])
             ->toolbarActions([
-                // BulkActionGroup::make([
-                //     // DeleteBulkAction::make(),
-                // ]),
+                //
             ]);
     }
 
@@ -97,8 +82,6 @@ class DeviceLogResource extends Resource
     {
         return [
             'index' => ListDeviceLogs::route('/'),
-            // 'create' => CreateDeviceLog::route('/create'),
-            // 'edit' => EditDeviceLog::route('/{record}/edit'),
         ];
     }
 

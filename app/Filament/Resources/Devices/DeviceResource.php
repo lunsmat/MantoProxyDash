@@ -15,6 +15,7 @@ use App\Filament\Resources\Devices\Pages\CreateDevice;
 use App\Filament\Resources\Devices\Pages\EditDevice;
 use App\Models\Device;
 use App\Models\Group;
+use App\Services\DeviceService;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\ToggleColumn;
@@ -34,6 +35,13 @@ class DeviceResource extends Resource
 
     protected static ?string $pluralModelLabel = 'Dispositivos';
 
+    private DeviceService $deviceService;
+
+    public function __construct()
+    {
+        $this->deviceService = new DeviceService();
+    }
+
 
     public static function form(Schema $schema): Schema
     {
@@ -51,8 +59,11 @@ class DeviceResource extends Resource
                 TextInput::make('mac_address')
                     ->required()
                     ->maxLength(17)
+                    ->helperText('Formato: XX-XX-XX-XX-XX-XX')
+                    ->mask('**-**-**-**-**-**')
                     ->label('Endereço MAC')
-                    ->unique(ignoreRecord: true),
+                    ->unique(ignoreRecord: true)
+                    ->dehydrateStateUsing(fn ($state) => strtoupper($state)),
                 Toggle::make('allow_connection')
                     ->onIcon('heroicon-o-check-circle')
                     ->offIcon('heroicon-o-x-circle')
@@ -84,12 +95,8 @@ class DeviceResource extends Resource
                     ->label('Permitir Conexão')
                     ->onIcon('heroicon-o-check-circle')
                     ->offIcon('heroicon-o-x-circle')
-                    ->action(function ($record) {
-                        $record->update([
-                            'allow_connection' => !$record->allow_connection,
-                        ]);
-
-                        Cache::store('redis')->delete('mac-to-permission-' . $record->mac_address);
+                    ->action(function ($record, $state) {
+                        $this->deviceService->updateConnectionState($record, $state);
                     })
                     ->sortable(),
                 TextColumn::make('created_at')
