@@ -45,26 +45,35 @@
     gap: 0.5rem;
 }
 
-.group-header .headers-button button {
+.group-header .headers-button button.activate {
     background-color: #3CB371;
-    padding: 0.5rem 1rem;
-    border: none;
-    border-radius: 0.5rem;
-    color: #fff;
-    cursor: pointer;
-    transition: background-color 0.3s;
+}
+
+.group-header .headers-button button.program {
+    background-color: #007bff;
 }
 
 .group-header .headers-button button.deactivate {
     background-color: #FF6347;
 }
 
-.group-header .headers-button button:hover {
+.group-header .headers-button button.activate:hover {
     background-color: #2e8b5c;
 }
 
 .group-header .headers-button button.deactivate:hover {
     background-color: #e55347;
+}
+
+.group-header .headers-button button.program:hover {
+    background-color: #0056b3;
+}
+
+.group-header input {
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    padding: 0.5rem;
+    width: 100%;
 }
 
 .devices-container {

@@ -67,7 +67,7 @@ class GroupService extends Service {
     }
 
     public function findGroupById(int $id): ?Group {
-        return Group::find($id)->first();
+        return Group::where('id', $id)->first();
     }
 
     public function registerLog(Group $group, string $message, mixed $context = null): void
@@ -79,7 +79,7 @@ class GroupService extends Service {
         $group->systemLog()->create([
             'message' => $message,
             'context' => json_encode($context),
-            'user_id' => $userId,
+            'user_id' => $this->isSystemRunning ? -1 : $userId,
         ]);
     }
 }

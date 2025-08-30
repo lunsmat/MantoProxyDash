@@ -7,7 +7,9 @@ use App\Models\Group;
 use App\Models\UrlFilter;
 use App\Services\DeviceService;
 use App\Services\FilterService;
+use App\Services\GroupDeactivationService;
 use App\Services\GroupService;
+use DateTime;
 use Filament\Resources\Pages\Page;
 use GMP;
 use Illuminate\Support\Facades\Auth;
@@ -26,11 +28,22 @@ class ViewGroup extends Page
 
     private FilterService $filterService;
 
+    private GroupDeactivationService $groupDeactivationService;
+
+    public string $deactivationDateTime = '';
+
+    public string $reactivationDateTime = '';
+
+    public string $deactivationReason = '';
+
+    public string $deactivationFormError = '';
+
     public function __construct()
     {
         $this->deviceService = new DeviceService();
         $this->groupService = new GroupService();
         $this->filterService = new FilterService();
+        $this->groupDeactivationService = new GroupDeactivationService();
     }
 
     public ?Group $record = null;
@@ -41,12 +54,15 @@ class ViewGroup extends Page
 
     public $filters = [];
 
+    public $deactivations = [];
+
     public function mount()
     {
-            $this->record = request()->route('record');
-            $this->getGroupDevices();
-            $this->getEnabledFilters();
-            $this->filters = $this->filterService->getAllFilters();
+        $this->record = request()->route('record');
+        $this->getGroupDevices();
+        $this->getEnabledFilters();
+        $this->getUserActiveDeactivations();
+        $this->filters = $this->filterService->getAllFilters();
     }
 
     private function getGroupDevices(): void
@@ -57,6 +73,11 @@ class ViewGroup extends Page
     private function getEnabledFilters(): void
     {
         $this->enabledFilters = $this->filterService->getGroupFiltersIds($this->record?->id ?? 0);
+    }
+
+    private function getUserActiveDeactivations()
+    {
+        $this->deactivations = $this->groupDeactivationService->getUserActiveDeactivations(Auth::user());
     }
 
     public function updateDeviceAuthorization(int $deviceId, bool $value)
@@ -121,5 +142,31 @@ class ViewGroup extends Page
             $this->groupService->detachFilter($this->record, $filter);
             $this->enabledFilters = array_filter($this->enabledFilters, fn($id) => $id !== $filter->id);
         }
+    }
+
+    public function scheduleDeactivation()
+    {
+        $deactivationDateTime = new DateTime($this->deactivationDateTime);
+        $reactivationDateTime = new DateTime($this->reactivationDateTime);
+
+        if ($deactivationDateTime >= $reactivationDateTime) {
+            $this->deactivationFormError = 'A data e hora de reativação devem ser posteriores à data e hora de desativação.';
+            return;
+        }
+        $this->groupDeactivationService->createDeactivation(
+            Auth::user(),
+            $this->record,
+            $deactivationDateTime,
+            $reactivationDateTime,
+            $this->deactivationReason
+        );
+
+        $this->deactivationDateTime = '';
+        $this->reactivationDateTime = '';
+        $this->deactivationReason = '';
+        $this->deactivationFormError = '';
+        $this->getUserActiveDeactivations();
+
+        $this->dispatch('close-modal', id: 'schedule-deactivation-modal');
     }
 }

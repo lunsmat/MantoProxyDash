@@ -45,6 +45,7 @@ class SystemLog extends Model
 
     public function getUserIdentifierAttribute()
     {
+        if ((int) $this->user_id === -1) return 'Sistema';
         if ($this->user_id !== null && $this->user === null) $this->load('user');
         if ($this->user) return $this->user->system_identifier ?? (string) $this->user_id;
         if ($this->user_id !== null) return (string) $this->user_id;

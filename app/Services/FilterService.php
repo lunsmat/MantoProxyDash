@@ -35,7 +35,7 @@ class FilterService extends Service
         $filter->systemLog()->create([
             'message' => $message,
             'context' => json_encode($context),
-            'user_id' => $userId,
+            'user_id' => $this->isSystemRunning ? -1 : $userId,
         ]);
     }
 }
