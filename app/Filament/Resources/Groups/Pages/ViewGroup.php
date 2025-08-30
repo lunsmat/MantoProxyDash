@@ -4,11 +4,13 @@ namespace App\Filament\Resources\Groups\Pages;
 
 use App\Filament\Resources\Groups\GroupResource;
 use App\Models\Group;
+use App\Models\UrlFilter;
 use App\Services\DeviceService;
 use App\Services\FilterService;
 use App\Services\GroupService;
 use Filament\Resources\Pages\Page;
 use GMP;
+use Illuminate\Support\Facades\Auth;
 
 class ViewGroup extends Page
 {
@@ -78,7 +80,15 @@ class ViewGroup extends Page
 
     public function enableAll()
     {
+        $this->deviceService->disableLogging();
         $this->deviceService->updateMultipleConnectionStates($this->devices, true);
+        $this->deviceService->enableLogging();
+
+        $this->groupService->registerLog($this->record, "Todos os dispositivos habilitados", [
+            'user_id' => Auth::user()?->id,
+            'group' => $this->record->toArray(),
+            'devices' => $this->devices,
+        ]);
 
         foreach ($this->devices as $device) {
             $device->allow_connection = true;
@@ -87,21 +97,29 @@ class ViewGroup extends Page
 
     public function disableAll()
     {
+        $this->deviceService->disableLogging();
         $this->deviceService->updateMultipleConnectionStates($this->devices, false);
+        $this->deviceService->enableLogging();
+
+        $this->groupService->registerLog($this->record, "Todos os dispositivos desabilitados", [
+            'user_id' => Auth::user()?->id,
+            'group' => $this->record->toArray(),
+            'devices' => $this->devices,
+        ]);
 
         foreach ($this->devices as $device) {
             $device->allow_connection = false;
         }
     }
 
-    public function updateFilter(int $filterId, bool $value)
+    public function updateFilter(UrlFilter $filter, bool $value)
     {
         if ($value) {
-            $this->groupService->attachFilter($this->record, $filterId);
-            $this->enabledFilters[] = $filterId;
+            $this->groupService->attachFilter($this->record, $filter);
+            $this->enabledFilters[] = $filter->id;
         } else {
-            $this->groupService->detachFilter($this->record, $filterId);
-            $this->enabledFilters = array_filter($this->enabledFilters, fn($id) => $id !== $filterId);
+            $this->groupService->detachFilter($this->record, $filter);
+            $this->enabledFilters = array_filter($this->enabledFilters, fn($id) => $id !== $filter->id);
         }
     }
 }

@@ -37,7 +37,7 @@
                 @foreach ($filters as $filter)
                     <div class="filter">
                         <span>{{ $filter->name }}</span>
-                        <button wire:click="updateFilter({{ $filter->id }}, {{ in_array($filter->id, $enabledFilters) ? 'false' : 'true' }})" class="{{ in_array($filter->id, $enabledFilters) ? 'active' : '' }}">
+                        <button wire:click="updateFilter({{ $filter }}, {{ in_array($filter->id, $enabledFilters) ? 'false' : 'true' }})" class="{{ in_array($filter->id, $enabledFilters) ? 'active' : '' }}">
                             {{ in_array($filter->id, $enabledFilters) ? 'Ativado' : 'Desativado' }}
                         </button>
                     </div>

@@ -116,7 +116,18 @@ class DeviceResource extends Resource
             ])
             ->toolbarActions([
                 BulkActionGroup::make([
-                    DeleteBulkAction::make(),
+                    DeleteBulkAction::make()->before(function (mixed $records) {
+                        $service = new DeviceService();
+
+                        foreach ($records as $record) {
+                            $record->load(['groups', 'filters']);
+                            $data = [
+                                'user_id' => auth()->id(),
+                                'device_id' => $record->toArray(),
+                            ];
+                            $service->registerLog($record, "Dispositivo removido", $data);
+                        }
+                    }),
                 ]),
             ]);
     }

@@ -57,7 +57,7 @@ class DeviceGroupsTable extends TableWidget
             DetachAction::make('detach')
                 ->label('Desvincular Grupos Selecionados')
                 ->action(function ($record) {
-                    $this->deviceService->detachGroup($this->record, $record->id);
+                    $this->deviceService->detachGroup($this->record, $record);
                     $this->dispatch('refresh');
                 })
                 ->requiresConfirmation(),

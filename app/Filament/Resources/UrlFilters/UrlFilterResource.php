@@ -15,6 +15,7 @@ use App\Filament\Resources\UrlFilters\Pages\EditUrlFilter;
 use App\Filament\Resources\UrlFilterResource\Pages;
 use App\Filament\Resources\UrlFilterResource\RelationManagers;
 use App\Models\UrlFilter;
+use App\Services\FilterService;
 use Filament\Actions\ViewAction;
 use Filament\Forms;
 use Filament\Forms\Components\CodeEditor;
@@ -79,7 +80,18 @@ class UrlFilterResource extends Resource
         if (Auth::user()->is_admin) {
             $recordActions[] = EditAction::make();
             $toolbarActions[] = BulkActionGroup::make([
-                DeleteBulkAction::make(),
+                DeleteBulkAction::make()->before(function (mixed $records) {
+                    $filterService = new FilterService();
+
+                    foreach ($records as $record) {
+                        $record->load(['devices', 'groups']);
+                        $data = [
+                            'user_id' => Auth::user()?->id,
+                            'filter' => $record->toArray(),
+                        ];
+                        $filterService->registerLog($record, "Filtro excluído", $data);
+                    }
+                }),
             ]);
         }
 

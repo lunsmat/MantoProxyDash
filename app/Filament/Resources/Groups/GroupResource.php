@@ -16,6 +16,7 @@ use App\Filament\Resources\Groups\Pages\EditGroup;
 use App\Filament\Resources\Groups\Pages\ViewGroup;
 use App\Models\Device;
 use App\Models\Group;
+use App\Services\GroupService;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -70,7 +71,18 @@ class GroupResource extends Resource
         if (Auth::user()->is_admin) {
             $recordActions[] = EditAction::make();
             $toolbarActions[] = BulkActionGroup::make([
-                DeleteBulkAction::make(),
+                DeleteBulkAction::make()->before(function (mixed $records) {
+                    $groupService = new GroupService();
+
+                    foreach ($records as $record) {
+                        $record->load(['devices', 'filters']);
+                        $data = [
+                            'user_id' => Auth::user()?->id,
+                            'group' => $record->toArray(),
+                        ];
+                        $groupService->registerLog($record, "Grupo excluído", $data);
+                    }
+                }),
             ]);
         }
 

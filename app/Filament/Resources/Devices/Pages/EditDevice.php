@@ -23,7 +23,14 @@ class EditDevice extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            DeleteAction::make(),
+            DeleteAction::make()
+                ->before(function () {
+                    $this->record->load(['groups', 'filters']);
+                    $this->deviceService->registerLog($this->record, 'Device deleted', [
+                        'user_id' => auth()->id(),
+                        'device_id' => $this->record->toArray(),
+                    ]);
+                }),
         ];
     }
 
@@ -37,7 +44,13 @@ class EditDevice extends EditRecord
 
     protected function afterSave(): void
     {
+        $this->record->load('groups');
         $this->deviceService->clearPermissionCache($this->record);
+
+        $this->deviceService->registerLog($this->record, 'Device updated', [
+            'user_id' => auth()->id(),
+            'device_id' => $this->record->toArray(),
+        ]);
     }
 
     protected function beforeSave(): void

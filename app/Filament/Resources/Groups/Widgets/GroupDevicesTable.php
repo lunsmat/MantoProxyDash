@@ -14,6 +14,7 @@ use Filament\Tables\Columns\ToggleColumn;
 use Filament\Widgets\TableWidget;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 
 class GroupDevicesTable extends TableWidget
 {
@@ -24,9 +25,12 @@ class GroupDevicesTable extends TableWidget
 
     private DeviceService $deviceService;
 
+    private GroupService $groupService;
+
     public function __construct()
     {
         $this->deviceService = new DeviceService();
+        $this->groupService = new GroupService();
     }
 
     protected function getTableQuery(): Builder | Relation
@@ -73,14 +77,28 @@ class GroupDevicesTable extends TableWidget
             BulkAction::make('allow_all')
                 ->label('Permitir acesso a todos selecionados')
                 ->action(function ($records) {
+                    $this->deviceService->disableLogging();
                     $this->deviceService->updateMultipleConnectionStates($records, true);
+                    $this->deviceService->enableLogging();
+                    $this->groupService->registerLog($this->record, "Permissão de acesso concedida a múltiplos dispositivos", [
+                        'user_id' => Auth::user()?->id,
+                        'group' => $this->record->toArray(),
+                        'devices' => $records->toArray(),
+                    ]);
                     $this->dispatch('refresh');
                 })
                 ->requiresConfirmation(),
             BulkAction::make('disallow_all')
                 ->label('Negar acesso a todos selecionados')
                 ->action(function ($records) {
+                    $this->deviceService->disableLogging();
                     $this->deviceService->updateMultipleConnectionStates($records, false);
+                    $this->deviceService->enableLogging();
+                    $this->groupService->registerLog($this->record, "Permissão de acesso negada a múltiplos dispositivos", [
+                        'user_id' => Auth::user()?->id,
+                        'group' => $this->record->toArray(),
+                        'devices' => $records->toArray(),
+                    ]);
                     $this->dispatch('refresh');
                 })
                 ->requiresConfirmation(),
@@ -95,7 +113,14 @@ class GroupDevicesTable extends TableWidget
                 ->label('Permitir Acesso a Todos')
                 ->action(function () {
                     $records = $this->deviceService->getGroupDevices($this->record->id);
+                    $this->deviceService->disableLogging();
                     $this->deviceService->updateMultipleConnectionStates($records, true);
+                    $this->deviceService->enableLogging();
+                    $this->groupService->registerLog($this->record, "Permissão de acesso concedida a todos dispositivos", [
+                        'user_id' => Auth::user()?->id,
+                        'group' => $this->record->toArray(),
+                        'devices' => $records->toArray(),
+                    ]);
                     $this->dispatch('refresh');
                 })
                 ->requiresConfirmation(),
@@ -105,7 +130,14 @@ class GroupDevicesTable extends TableWidget
                 ->label('Negar Acesso a Todos')
                 ->action(function () {
                     $records = $this->deviceService->getGroupDevices($this->record->id);
+                    $this->deviceService->disableLogging();
                     $this->deviceService->updateMultipleConnectionStates($records, false);
+                    $this->deviceService->enableLogging();
+                    $this->groupService->registerLog($this->record, "Permissão de acesso negada a todos dispositivos", [
+                        'user_id' => Auth::user()?->id,
+                        'group' => $this->record->toArray(),
+                        'devices' => $records->toArray(),
+                    ]);
                     $this->dispatch('refresh');
                 })
                 ->requiresConfirmation(),
@@ -118,7 +150,7 @@ class GroupDevicesTable extends TableWidget
             DetachAction::make('detach')
                 ->label('Desvincular Dispositivos Selecionados')
                 ->action(function ($record) {
-                    $this->record->devices()->detach($record);
+                    $this->groupService->detachDevice($this->record, $record);
                     $this->dispatch('refresh');
                 })
                 ->requiresConfirmation(),

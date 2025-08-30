@@ -3,44 +3,124 @@
 namespace App\Services;
 
 use App\Models\Device;
+use App\Models\Group;
+use App\Models\UrlFilter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
-class DeviceService {
-    public function detachFilter(Device $device, int $filterId): void {
-        $device->filters()->detach($filterId);
+class DeviceService extends Service {
+    public function detachFilter(Device $device, UrlFilter $filter): void {
+        $device->load('filters');
+        $before = [
+            'device' => $device->toArray(),
+            'filter' => $filter->toArray(),
+        ];
+
+        $device->filters()->detach($filter->id);
         $this->clearFilterCache($device);
+
+        $after = [
+            'device' => $device->toArray(),
+            'filter' => $filter->toArray(),
+        ];
+        $this->registerLog($device, "Removido Filtro: " . $filter->name, [
+            'action' => 'detach',
+            'before' => $before,
+            'after' => $after
+        ]);
     }
 
-    public function attachFilter(Device $device, int $filterId): void {
-        $device->filters()->attach($filterId);
+    public function attachFilter(Device $device, UrlFilter $filter): void {
+        $device->load('filters');
+        $before = [
+            'device' => $device->toArray(),
+            'filter' => $filter->toArray(),
+        ];
+
+        $device->filters()->attach($filter->id);
         $this->clearFilterCache($device);
+
+        $after = [
+            'device' => $device->toArray(),
+            'filter' => $filter->toArray(),
+        ];
+        $this->registerLog($device, "Adicionado Filtro: " . $filter->name, [
+            'action' => 'attach',
+            'before' => $before,
+            'after' => $after
+        ]);
     }
 
-    public function detachGroup(Device $device, int $groupId): void {
-        $device->groups()->detach($groupId);
+    public function detachGroup(Device $device, Group $group): void {
+        $device->load('groups');
+        $before = [
+            'device' => $device->toArray(),
+            'group' => $group->toArray(),
+        ];
+
+        $device->groups()->detach($group->id);
+
+        $after = [
+            'device' => $device->toArray(),
+            'group' => $group->toArray(),
+        ];
+        $this->registerLog($device, "Removido Grupo: " . $group->name, [
+            'action' => 'detach',
+            'before' => $before,
+            'after' => $after
+        ]);
     }
 
     public function updateConnectionState(Device $device, bool $state): void
     {
+        $before = [
+            'device' => $device->toArray(),
+        ];
+
         $device->allow_connection = $state;
         $device->save();
 
         $this->clearPermissionCache($device);
+
+        $after = [
+            'device' => $device->toArray(),
+        ];
+        $this->registerLog($device, "Atualizado estado de conexão", [
+            'action' => 'update',
+            'before' => $before,
+            'after' => $after
+        ]);
     }
 
     public function updateMultipleConnectionStates(mixed $devices, bool $state): void
     {
+        $before = [];
+        $after = [];
+
         $ids = [];
         $macAddresses = [];
 
         foreach ($devices as $device) {
+            $before[] = $device->toArray();
             $ids[] = $device->id;
             $macAddresses[] = $device->mac_address;
         }
 
         Device::whereIn('id', $ids)->update(['allow_connection' => $state]);
+
+        foreach ($devices as $device) {
+            $device->refresh();
+            $after[] = $device->toArray();
+
+        }
         $this->clearMultiplePermissionCache($devices);
+
+        $this->registerLog($device, "Atualizado múltiplos estados de conexão", [
+            'action' => 'update',
+            'before' => $before,
+            'after' => $after
+        ]);
     }
 
     public function clearPermissionCache(Device $device): void {
@@ -77,5 +157,18 @@ class DeviceService {
         return Device::whereHas('groups', function (Builder $query) use ($groupId) {
             $query->where('group_id', $groupId);
         })->orderBy('name')->get();
+    }
+
+    public function registerLog(Device $device, string $message, mixed $context = null): void
+    {
+        if (!$this->log) return;
+
+        $userId = Auth::user()?->id;
+
+        $device->systemLog()->create([
+            'message' => $message,
+            'context' => json_encode($context),
+            'user_id' => $userId,
+        ]);
     }
 }

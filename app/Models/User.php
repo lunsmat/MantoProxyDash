@@ -59,4 +59,14 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function systemLog()
+    {
+        return $this->morphMany(SystemLog::class, 'object');
+    }
+
+    public function getSystemIdentifierAttribute()
+    {
+        return $this->id . " - " . $this->name;
+    }
 }

@@ -50,9 +50,9 @@ class UrlFilterTable extends TableWidget
                 ->offIcon('heroicon-o-x-circle')
                 ->updateStateUsing(function ($record, $state) {
                     if ($state) {
-                        $this->groupService->attachFilter($this->record, $record->id);
+                        $this->groupService->attachFilter($this->record, $record);
                     } else {
-                        $this->groupService->detachFilter($this->record, $record->id);
+                        $this->groupService->detachFilter($this->record, $record);
                     }
 
                     return $state ? true : false;

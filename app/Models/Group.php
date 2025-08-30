@@ -26,4 +26,14 @@ class Group extends Model
     {
         return $this->belongsToMany(UrlFilter::class, 'url_filter_groups', 'group_id', 'url_filter_id');
     }
+
+    public function systemLog()
+    {
+        return $this->morphMany(SystemLog::class, 'object');
+    }
+
+    public function getSystemIdentifierAttribute(): string
+    {
+        return 'Grupo: ' . $this->id . ' - ' . $this->name;
+    }
 }

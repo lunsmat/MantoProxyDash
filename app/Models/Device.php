@@ -37,4 +37,14 @@ class Device extends Model
     {
         parent::boot();
     }
+
+    public function systemLog()
+    {
+        return $this->morphMany(SystemLog::class, 'object');
+    }
+
+    public function getSystemIdentifierAttribute(): string
+    {
+        return 'Dispositivo: ' . $this->id . ' - ' . $this->name . ' (' . $this->mac_address . ')';
+    }
 }

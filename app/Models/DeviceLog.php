@@ -18,4 +18,14 @@ class DeviceLog extends Model
     {
         return $this->belongsTo(Device::class);
     }
+
+    public function systemLog()
+    {
+        return $this->morphMany(SystemLog::class, 'object');
+    }
+
+    public function getSystemIdentifierAttribute(): string
+    {
+        return 'Log de Requisiçaõ: ' . $this->id . ' - ' . $this->http_url . ' (' . $this->http_method . ')';
+    }
 }
