@@ -15,6 +15,7 @@ use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Table;
+use Illuminate\Support\Facades\Auth;
 
 class SystemLogResource extends Resource
 {
@@ -54,5 +55,10 @@ class SystemLogResource extends Resource
             'index' => ListSystemLogs::route('/'),
             'view' => ViewSystemLog::route('/{record}'),
         ];
+    }
+
+    public static function canAccess(): bool
+    {
+        return Auth::user()->is_admin;
     }
 }
