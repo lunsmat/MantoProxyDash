@@ -55,9 +55,10 @@ class GroupDeactivationService extends Service
             ->get();
     }
 
-    public function getUserActiveDeactivations(User $user)
+    public function getUserGroupActiveDeactivations(User $user, Group $group)
     {
         return GroupDeactivation::where('user_id', $user->id)
+            ->where('group_id', $group->id)
             ->where(function ($query) {
                 $query->where('deactivation_occurred', false)
                     ->orWhere('reactivation_occurred', false);

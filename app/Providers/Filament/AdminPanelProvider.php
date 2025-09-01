@@ -33,7 +33,20 @@ class AdminPanelProvider extends PanelProvider
             ->path('/')
             ->login()
             ->colors([
-                'primary' => Color::Blue,
+                'primary' => [
+                    50  => 'oklch(0.97 0.014 264.1)',
+                    100 => 'oklch(0.932 0.032 264.1)',
+                    200 => 'oklch(0.882 0.059 264.1)',
+                    300 => 'oklch(0.809 0.105 264.1)',
+                    400 => 'oklch(0.707 0.165 264.1)',
+                    500 => 'oklch(0.623 0.201 264.1)', // cor original
+                    600 => 'oklch(0.546 0.235 264.1)',
+                    700 => 'oklch(0.488 0.243 264.1)',
+                    800 => 'oklch(0.424 0.199 264.1)',
+                    900 => 'oklch(0.379 0.146 264.1)',
+                    950 => 'oklch(0.282 0.091 264.1)',
+
+                ],
             ])
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')

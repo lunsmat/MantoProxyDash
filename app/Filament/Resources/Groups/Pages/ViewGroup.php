@@ -77,7 +77,7 @@ class ViewGroup extends Page
 
     private function getUserActiveDeactivations()
     {
-        $this->deactivations = $this->groupDeactivationService->getUserActiveDeactivations(Auth::user());
+        $this->deactivations = $this->groupDeactivationService->getUserGroupActiveDeactivations(Auth::user(), $this->record);
     }
 
     public function updateDeviceAuthorization(int $deviceId, bool $value)
