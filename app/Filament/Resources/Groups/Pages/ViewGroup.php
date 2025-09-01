@@ -38,12 +38,15 @@ class ViewGroup extends Page
 
     public string $deactivationFormError = '';
 
+    public bool $isAdmin = false;
+
     public function __construct()
     {
         $this->deviceService = new DeviceService();
         $this->groupService = new GroupService();
         $this->filterService = new FilterService();
         $this->groupDeactivationService = new GroupDeactivationService();
+        $this->isAdmin = Auth::user()?->is_admin ?? false;
     }
 
     public ?Group $record = null;

@@ -13,6 +13,7 @@
                 Desabilitar Todos
             </x-filament::button>
 
+            @if ($isAdmin)
             <x-filament::modal id="schedule-deactivation-modal">
                 <x-slot name="trigger">
                     <x-filament::button class="program">
@@ -91,6 +92,7 @@
                     </x-filament::button>
                 </x-slot>
             </x-filament::modal>
+            @endif
         </div>
     </header>
 
