@@ -18,7 +18,7 @@ class DeviceService extends Service {
         ];
 
         $device->filters()->detach($filter->id);
-        $this->clearFilterCache($device);
+        $this->clearDeviceCache($device);
 
         $after = [
             'device' => $device->toArray(),
@@ -39,7 +39,7 @@ class DeviceService extends Service {
         ];
 
         $device->filters()->attach($filter->id);
-        $this->clearFilterCache($device);
+        $this->clearDeviceCache($device);
 
         $after = [
             'device' => $device->toArray(),
@@ -81,7 +81,7 @@ class DeviceService extends Service {
         $device->allow_connection = $state;
         $device->save();
 
-        $this->clearPermissionCache($device);
+        $this->clearDeviceCache($device);
 
         $after = [
             'device' => $device->toArray(),
@@ -114,7 +114,7 @@ class DeviceService extends Service {
             $after[] = $device->toArray();
 
         }
-        $this->clearMultiplePermissionCache($devices);
+        $this->clearMultipleDeviceCache($devices);
 
         $this->registerLog($device, "Atualizado múltiplos estados de conexão", [
             'action' => 'update',
@@ -123,26 +123,19 @@ class DeviceService extends Service {
         ]);
     }
 
-    public function clearPermissionCache(Device $device): void {
-        Cache::store('redis')->delete('mac-to-permission-' . $device->mac_address);
+    public function clearDeviceCache(Device $device): void
+    {
+        Cache::store('redis')->delete('data-from-mac-' . $device->mac_address);
     }
 
-    public function clearMultiplePermissionCache(mixed $devices): void {
+    public function clearMultipleDeviceCache(mixed $devices): void {
         $keys = [];
 
         foreach ($devices as $device) {
-            $keys[] = 'mac-to-permission-' . $device->mac_address;
+            $keys[] = 'data-from-mac-' . $device->mac_address;
         }
 
         Cache::store('redis')->deleteMultiple($keys);
-    }
-
-    public function clearFilterCache(Device $device): void {
-        Cache::store('redis')->delete('mac-to-filters-' . $device->mac_address);
-    }
-
-    public function clearDeviceIdFromMac($macAddress): void {
-        Cache::store('redis')->delete('device-id-from-mac-' . $macAddress);
     }
 
     public function getGroupDevices(int $groupId): mixed

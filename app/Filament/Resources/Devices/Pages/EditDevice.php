@@ -45,7 +45,7 @@ class EditDevice extends EditRecord
     protected function afterSave(): void
     {
         $this->record->load('groups');
-        $this->deviceService->clearPermissionCache($this->record);
+        $this->deviceService->clearDeviceCache($this->record);
 
         $this->deviceService->registerLog($this->record, 'Device updated', [
             'user_id' => auth()->id(),
@@ -55,6 +55,6 @@ class EditDevice extends EditRecord
 
     protected function beforeSave(): void
     {
-        $this->deviceService->clearDeviceIdFromMac($this->record->mac_address);
+        $this->deviceService->clearDeviceCache($this->record);
     }
 }
