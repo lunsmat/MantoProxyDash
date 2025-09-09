@@ -32,6 +32,6 @@ return new class extends Migration
     public function down(): void
     {
         DB::statement("DROP INDEX IF EXISTS idx_device_data_mac_address;");
-        DB::statement("DROP VIEW IF EXISTS device_data");
+        DB::statement("DROP MATERIALIZED VIEW IF EXISTS device_data");
     }
 };
