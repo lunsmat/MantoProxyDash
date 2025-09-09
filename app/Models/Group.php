@@ -11,7 +11,6 @@ class Group extends Model
 {
     use HasFactory;
 
-
     protected $fillable = [
         'name',
         'description',
@@ -30,6 +29,16 @@ class Group extends Model
     public function systemLog()
     {
         return $this->morphMany(SystemLog::class, 'object');
+    }
+
+    public function sshExecutions()
+    {
+        return $this->morphMany(SSHExecution::class, 'object');
+    }
+
+    public function defaultSSHUser()
+    {
+        return $this->belongsTo(SSHUser::class, 'default_ssh_user');
     }
 
     public function getSystemIdentifierAttribute(): string

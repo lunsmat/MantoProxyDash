@@ -11,7 +11,7 @@ return new class extends Migration
     public function up(): void
     {
         DB::statement("
-            CREATE OR REPLACE VIEW device_data AS
+            CREATE MATERIALIZED VIEW device_data AS
                 SELECT
                     devices.id,
                     devices.name,
@@ -22,6 +22,8 @@ return new class extends Migration
                 LEFT JOIN device_filters ON device_filters.device_id = devices.id
                 GROUP BY devices.id, devices.name, devices.mac_address, devices.allow_connection;
         ");
+
+        DB::statement("CREATE INDEX idx_device_data_mac_address ON device_data (mac_address);");
     }
 
     /**
@@ -29,6 +31,7 @@ return new class extends Migration
      */
     public function down(): void
     {
+        DB::statement("DROP INDEX IF EXISTS idx_device_data_mac_address;");
         DB::statement("DROP VIEW IF EXISTS device_data");
     }
 };

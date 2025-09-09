@@ -16,6 +16,7 @@ use App\Filament\Resources\Groups\Pages\EditGroup;
 use App\Filament\Resources\Groups\Pages\ViewGroup;
 use App\Models\Device;
 use App\Models\Group;
+use App\Models\SSHUser;
 use App\Services\GroupService;
 use Filament\Actions\ViewAction;
 use Filament\Resources\Resource;
@@ -43,6 +44,10 @@ class GroupResource extends Resource
             ->pluck('name', 'id')
             ->toArray();
 
+        $sshUsers = SSHUser::all()
+            ->pluck('username', 'id')
+            ->toArray();
+
         return $schema
             ->components([
                 TextInput::make('name')
@@ -58,6 +63,11 @@ class GroupResource extends Resource
                     ->preload()
                     ->options($devices)
                     ->label('Dispositivos'),
+                Select::make('default_ssh_user')
+                    ->options($sshUsers)
+                    ->searchable()
+                    ->nullable()
+                    ->label('Usuário SSH Padrão'),
             ])->columns(1);
     }
 

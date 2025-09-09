@@ -3,7 +3,9 @@
 namespace App\Filament\Resources\Groups\Pages;
 
 use App\Filament\Resources\Groups\GroupResource;
+use App\Jobs\RunSSHExecutionJob;
 use App\Models\Group;
+use App\Models\SSHUser;
 use App\Models\UrlFilter;
 use App\Services\DeviceService;
 use App\Services\FilterService;
@@ -12,33 +14,34 @@ use App\Services\GroupService;
 use DateTime;
 use Filament\Resources\Pages\Page;
 use GMP;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
+use Livewire\Features\SupportFileUploads\WithFileUploads;
 
 class ViewGroup extends Page
 {
+    use WithFileUploads;
+
     protected static string $resource = GroupResource::class;
-
     protected string $view = 'filament.resources.groups.pages.view-group';
-
     protected static ?string $title = 'Visualizar Grupo';
 
     private GroupService $groupService;
-
     private DeviceService $deviceService;
-
     private FilterService $filterService;
-
     private GroupDeactivationService $groupDeactivationService;
 
     public string $deactivationDateTime = '';
-
     public string $reactivationDateTime = '';
-
     public string $deactivationReason = '';
-
     public string $deactivationFormError = '';
-
     public bool $isAdmin = false;
+
+
+    public $sshUsers;
+    public ?int $selectedSSHUserId = null;
+    public string $sshCommand = '';
+    public $script;
 
     public function __construct()
     {
@@ -46,6 +49,7 @@ class ViewGroup extends Page
         $this->groupService = new GroupService();
         $this->filterService = new FilterService();
         $this->groupDeactivationService = new GroupDeactivationService();
+        $this->sshUsers = SSHUser::all();
         $this->isAdmin = Auth::user()?->is_admin ?? false;
     }
 
@@ -171,5 +175,24 @@ class ViewGroup extends Page
         $this->getUserActiveDeactivations();
 
         $this->dispatch('close-modal', id: 'schedule-deactivation-modal');
+    }
+
+    public function shutdownAll()
+    {
+        if (!$this->isAdmin) {
+            return;
+        }
+
+        if (!$this->selectedSSHUserId) {
+            return;
+        }
+
+        $sshUser = SSHUser::find($this->selectedSSHUserId);
+        if (!$sshUser) {
+            return;
+        }
+
+        $execution = $this->groupService->createExecution($this->record, $sshUser, 'sudo shutdown -h now');
+        RunSSHExecutionJob::dispatch($execution->id);
     }
 }

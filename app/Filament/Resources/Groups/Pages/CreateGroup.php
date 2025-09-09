@@ -6,6 +6,7 @@ use App\Filament\Resources\Groups\GroupResource;
 use App\Services\GroupService;
 use Filament\Actions;
 use Filament\Resources\Pages\CreateRecord;
+use Illuminate\Support\Facades\Auth;
 
 class CreateGroup extends CreateRecord
 {
@@ -21,7 +22,7 @@ class CreateGroup extends CreateRecord
     {
         $this->record->load('devices');
         $this->groupService->registerLog($this->record, "Grupo criado", [
-            'user_id' => auth()->id(),
+            'user_id' => Auth::user()->id,
             'group_id' => $this->record->id,
         ]);
     }

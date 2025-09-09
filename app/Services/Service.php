@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-class Service
+abstract class Service
 {
     protected bool $log = true;
 

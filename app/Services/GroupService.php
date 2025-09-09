@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Device;
 use App\Models\Group;
+use App\Models\SSHExecution;
+use App\Models\SSHUser;
 use App\Models\UrlFilter;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
@@ -45,6 +47,28 @@ class GroupService extends Service {
             'before' => $before,
             'after' => $after
         ]);
+    }
+
+    public function createExecution(Group $group, SSHUser $user, ?string $command = null, ?string $path = null): SSHExecution
+    {
+        $execution = $group->sshExecutions()->create([
+            'ssh_user_id' => $user->id,
+            'command' => $command,
+            'script_path' => $path,
+            'status' => 'pending',
+            'output' => null,
+            'error_output' => null,
+            'started_at' => null,
+            'finished_at' => null,
+            'user_id' => Auth::user()?->id,
+        ]);
+
+        $this->registerLog($group, "Criada Execução SSH: " . $execution->id, [
+            'action' => 'create_execution',
+            'execution' => $execution->toArray()
+        ]);
+
+        return $execution;
     }
 
     public function detachDevice(Group $group, Device $device): void {

@@ -33,6 +33,16 @@ class Device extends Model
         return $this->hasMany(DeviceLog::class);
     }
 
+    public function sshExecutions()
+    {
+        return $this->morphMany(SSHExecution::class, 'object');
+    }
+
+    public function sshDefaultUser()
+    {
+        return $this->belongsTo(SSHUser::class, 'default_ssh_user');
+    }
+
     protected static function boot()
     {
         parent::boot();

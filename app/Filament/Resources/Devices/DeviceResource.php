@@ -15,6 +15,7 @@ use App\Filament\Resources\Devices\Pages\CreateDevice;
 use App\Filament\Resources\Devices\Pages\EditDevice;
 use App\Models\Device;
 use App\Models\Group;
+use App\Models\SSHUser;
 use App\Services\DeviceService;
 use Filament\Resources\Resource;
 use Filament\Support\Icons\Heroicon;
@@ -50,6 +51,10 @@ class DeviceResource extends Resource
             ->pluck('name', 'id')
             ->toArray();
 
+        $sshUsers = SSHUser::all()
+            ->pluck('username', 'id')
+            ->toArray();
+
         return $schema
             ->components([
                 TextInput::make('name')
@@ -69,13 +74,17 @@ class DeviceResource extends Resource
                     ->offIcon('heroicon-o-x-circle')
                     ->default(true)
                     ->label('Permitir Conexão'),
-
                 Select::make('groups')
                     ->multiple()
                     ->relationship('groups', 'name')
                     ->preload()
                     ->options($groups)
                     ->label('Grupos'),
+                Select::make('default_ssh_user')
+                    ->options($sshUsers)
+                    ->searchable()
+                    ->nullable()
+                    ->label('Usuário SSH Padrão'),
             ])->columns(1);
     }
 

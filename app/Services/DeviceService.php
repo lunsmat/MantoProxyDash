@@ -4,12 +4,18 @@ namespace App\Services;
 
 use App\Models\Device;
 use App\Models\Group;
+use App\Models\SSHExecution;
+use App\Models\SSHUser;
 use App\Models\UrlFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 class DeviceService extends Service {
+    public function getById(int $id): ?Device {
+        return Device::where('id', $id)->first();
+    }
+
     public function detachFilter(Device $device, UrlFilter $filter): void {
         $device->load('filters');
         $before = [
@@ -163,5 +169,27 @@ class DeviceService extends Service {
             'context' => json_encode($context),
             'user_id' => $this->isSystemRunning ? -1 : $userId,
         ]);
+    }
+
+    public function createExecution(Device $device, SSHUser $user, ?string $command = null, ?string $path = null): SSHExecution
+    {
+        $execution = $device->sshExecutions()->create([
+            'ssh_user_id' => $user->id,
+            'command' => $command,
+            'script_path' => $path,
+            'status' => 'pending',
+            'output' => null,
+            'error_output' => null,
+            'started_at' => null,
+            'finished_at' => null,
+            'user_id' => Auth::user()?->id,
+        ]);
+
+        $this->registerLog($device, "Criada Execução SSH: " . $execution->id, [
+            'action' => 'create_execution',
+            'execution' => $execution->toArray()
+        ]);
+
+        return $execution;
     }
 }

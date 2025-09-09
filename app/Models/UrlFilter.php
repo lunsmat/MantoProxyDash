@@ -28,8 +28,6 @@ class UrlFilter extends Model
         return $this->morphMany(SystemLog::class, 'object');
     }
 
-
-
     public function getSystemIdentifierAttribute(): string
     {
         return 'Filtro de URL: ' . $this->id . ' - ' . $this->name;
