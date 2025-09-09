@@ -6,6 +6,7 @@ use App\Handlers\SSHHandler;
 use App\Services\DeviceService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Storage;
 use Symfony\Component\Console\Output\BufferedOutput;
 
 class DeviceSSHRunScript extends Command
@@ -15,7 +16,7 @@ class DeviceSSHRunScript extends Command
      *
      * @var string
      */
-    protected $signature = 'app:device-ssh-run-script {--device-id=} {--port=22} {--username=} {--password=} {--publicKeyFilePath=} {--privateKeyFilePath=} {--passphrase=} {--scriptPath=} {--command=}';
+    protected $signature = 'app:device-ssh-run-script {--device-id=} {--port=22} {--username=} {--password=} {--publicKeyFilePath=} {--privateKeyFilePath=} {--passphrase=} {--scriptPath=} {--command=} {--executionId=0}';
 
     /**
      * The console command description.
@@ -41,9 +42,11 @@ class DeviceSSHRunScript extends Command
         $scriptPath = $this->option('scriptPath');
         $command = $this->option('command');
 
+        $executionId = $this->option('executionId');
+
         if (!$deviceId)
         {
-            echo "Device ID is required.\n";
+            Storage::disk('logs')->put("ssh_execution_{$executionId}.log", "Device ID is required.\n", FILE_APPEND);
             return 1;
         }
 
@@ -51,28 +54,27 @@ class DeviceSSHRunScript extends Command
         $device = $service->getById($deviceId);
 
         if (!$device) {
-            echo "Device not found.\n";
+            Storage::disk('logs')->put("ssh_execution_{$executionId}.log", "Device with ID {$deviceId} not found.\n", FILE_APPEND);
             return 1;
         }
 
         $ip = $this->findIpFromMac($device->mac_address);
         if (!$ip){
-            // echo "IP address not found for device with MAC: " . $device->mac_address . "\n";
-            $this->error("IP address not found for device with MAC: " . $device->mac_address);
+            Storage::disk('logs')->put("ssh_execution_{$executionId}.log", "IP address not found for device with MAC: " . $device->mac_address . "\n", FILE_APPEND);
             return 1;
         }
         $return = $this->pingIP($ip);
         if (!$return) {
-            echo "Device with IP $ip is not reachable." . "\n";
+            Storage::disk('logs')->put("ssh_execution_{$executionId}.log", "Device with IP {$ip} is not reachable.\n", FILE_APPEND);
             return 1;
         }
         $checkIp = $this->findIpFromMac($device->mac_address);
         if ($ip !== $checkIp) {
-            echo "Device IP has changed from $ip to $checkIp. Aborting." . "\n";
+            Storage::disk('logs')->put("ssh_execution_{$executionId}.log", "IP address for device with MAC: " . $device->mac_address . " has changed from {$ip} to {$checkIp}\n", FILE_APPEND);
             return 1;
         }
 
-        echo "All checks passed, now to app:ssh-run-script command...\n";
+        Storage::disk('logs')->put("ssh_execution_{$executionId}.log", "All checks passed, now to app:ssh-run-script command...\n", FILE_APPEND);
         Artisan::call('app:ssh-run-script', [
             '--host' => $ip,
             '--port' => $port,
@@ -83,9 +85,9 @@ class DeviceSSHRunScript extends Command
             '--passphrase' => $passphrase,
             '--scriptPath' => $scriptPath,
             '--command' => $command,
+            '--executionId' => $executionId,
         ]);
 
-        echo Artisan::output(). "\n";
         return 0;
     }
 

@@ -16,6 +16,7 @@ class Device extends Model
         'name',
         'mac_address',
         'allow_connection',
+        'default_ssh_user',
     ];
 
     public function groups(): BelongsToMany

@@ -183,11 +183,11 @@ class ViewGroup extends Page
             return;
         }
 
-        if (!$this->selectedSSHUserId) {
+        if (!$this->record->default_ssh_user) {
             return;
         }
 
-        $sshUser = SSHUser::find($this->selectedSSHUserId);
+        $sshUser = $this->record->sshDefaultUser;
         if (!$sshUser) {
             return;
         }

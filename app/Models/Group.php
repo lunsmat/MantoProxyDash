@@ -14,6 +14,7 @@ class Group extends Model
     protected $fillable = [
         'name',
         'description',
+        'default_ssh_user',
     ];
 
     public function devices(): BelongsToMany
@@ -36,7 +37,7 @@ class Group extends Model
         return $this->morphMany(SSHExecution::class, 'object');
     }
 
-    public function defaultSSHUser()
+    public function sshDefaultUser()
     {
         return $this->belongsTo(SSHUser::class, 'default_ssh_user');
     }

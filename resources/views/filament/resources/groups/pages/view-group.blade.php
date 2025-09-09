@@ -16,7 +16,7 @@
     </header>
 
     @if ($isAdmin)
-    <div>
+    <div style="margin-bottom: 1rem; display: flex; gap: 1rem;">
         <x-filament::modal id="schedule-deactivation-modal">
             <x-slot name="trigger">
                 <x-filament::button class="program">
@@ -96,36 +96,9 @@
             </x-slot>
         </x-filament::modal>
 
-        <x-filament::modal id="shutdown-all">
-            <x-slot name="trigger">
-                <x-filament::button class="program">
-                    Desligar Laboratório
-                </x-filament::button>
-            </x-slot>
-
-            <x-slot name="heading">
-                Desligar Laboratório
-            </x-slot>
-
-            <form wire:submit.prevent="shutdownAll">
-                <div class="space-y-4">
-                    <label>
-                        <span>Usuário SSH</span>
-                        <select wire:model.defer="selectedSSHUserId" class="filament-forms-text-input">
-                            <option value="">Selecione um usuário SSH</option>
-                            @foreach ($sshUsers as $user)
-                                <option value="{{ $user->id }}">{{ $user->name }} ({{ $user->username }}@(host):{{ $user->port }})</option>
-                            @endforeach
-                        </select>
-                    </label>
-                </div>
-
-                <x-slot name="footerActions">
-                    <x-filament::button wire:click="shutdownAll">
-                    Confirmar
-                </x-filament::button>
-            </x-slot>
-        </x-filament::modal>
+        <x-filament::button class="deactivate" wire:click="shutdownAll">
+            Desligar Laboratório
+        </x-filament::button>
     </div>
     @endif
 

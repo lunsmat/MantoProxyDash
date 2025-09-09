@@ -81,7 +81,7 @@ class RunSSHExecution extends Command
     private function handleDeviceExecution(SSHExecution $execution, Device $device): SSHExecution
     {
         $execution->load('sshUser');
-        $return = Artisan::call("app:device-ssh-run-script", [
+        $return = $this->call("app:device-ssh-run-script", [
             '--device-id' => $device->id,
             '--port' => $execution->sshUser->port,
             '--username' => $execution->sshUser->username,
@@ -93,6 +93,7 @@ class RunSSHExecution extends Command
             '--passphrase' => $execution->sshUser->passphrase,
             '--scriptPath' => $execution->script_path,
             '--command' => $execution->command,
+            '--executionId' => $execution->id,
         ]);
 
         if ($return === 0) {
@@ -100,8 +101,10 @@ class RunSSHExecution extends Command
         } else {
             $execution->status = 'failed';
         }
-        $output = Artisan::output();
+        echo $execution->id;
+        $output = Storage::disk('logs')->get("ssh_execution_{$execution->id}.log");
         if (!$execution->output) $execution->output = '';
+        $execution->output .= "===================== Final Output - {$execution->updated_at} =====================\n";
         $execution->output .= $output;
         $execution->save();
 

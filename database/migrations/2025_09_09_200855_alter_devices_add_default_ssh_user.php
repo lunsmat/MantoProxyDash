@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('devices', function (Blueprint $table) {
-            $table->integer('default_ssh_user')->nullable()->after('ip_address');
+            $table->integer('default_ssh_user')->nullable();
 
             $table->foreign('default_ssh_user')->references('id')->on('ssh_users')->onDelete('set null');
         });

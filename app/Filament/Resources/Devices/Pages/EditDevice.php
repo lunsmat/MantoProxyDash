@@ -42,7 +42,7 @@ class EditDevice extends EditRecord
                 ->action(function () {
                     if (!$this->record?->default_ssh_user)
                         return null;
-                    $sshUser = $this->record->sshDefaultUser();
+                    $sshUser = $this->record->sshDefaultUser;
                     if (!$sshUser)
                         return null;
                     $execution = $this->deviceService->createExecution($this->record, $sshUser, command: "sudo shutdown -h now");
@@ -65,7 +65,7 @@ class EditDevice extends EditRecord
         $this->deviceService->clearDeviceCache($this->record);
 
         $this->deviceService->registerLog($this->record, 'Device updated', [
-            'user_id' => auth()->id(),
+            'user_id' => Auth::user()?->id,
             'device_id' => $this->record->toArray(),
         ]);
     }

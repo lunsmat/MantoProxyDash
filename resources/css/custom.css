@@ -53,7 +53,7 @@
     background-color: #007bff;
 }
 
-.group-header .headers-button button.deactivate {
+button.deactivate {
     background-color: #FF6347;
 }
 
