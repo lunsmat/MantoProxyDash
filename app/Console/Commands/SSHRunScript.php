@@ -45,6 +45,8 @@ class SSHRunScript extends Command
             return 1;
         }
 
+        $command = $command ? (!empty($command) ? $command : null) : null;
+
         if (!($scriptPath || $command) && !($scriptPath && $command)) {
             Storage::disk('logs')->put("ssh_execution_{$executionId}.log", "Either scriptPath or command must be provided.\n", FILE_APPEND);
             return 1;

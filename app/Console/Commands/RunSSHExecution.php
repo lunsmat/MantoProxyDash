@@ -101,7 +101,6 @@ class RunSSHExecution extends Command
         } else {
             $execution->status = 'failed';
         }
-        echo $execution->id;
         $output = Storage::disk('logs')->get("ssh_execution_{$execution->id}.log");
         if (!$execution->output) $execution->output = '';
         $execution->output .= "===================== Final Output - {$execution->updated_at} =====================\n";

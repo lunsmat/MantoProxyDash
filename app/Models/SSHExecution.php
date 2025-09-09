@@ -57,4 +57,18 @@ class SSHExecution extends Model
     {
         return 'Execução SSH: ' . $this->id;
     }
+
+    public function getObjectIdentifierAttribute()
+    {
+        if ($this->object_id !== null && $this->object === null) $this->load('object');
+        if ($this->object) return $this->object->system_identifier ?? (string) $this->object_id;
+        if ($this->object_id !== null) return (string) $this->object_type . '-' . $this->object_id;
+
+        return 'N/A';
+    }
+
+    public function getRunTypeAttribute(): string
+    {
+        return $this->script_path ? 'script' : 'command';
+    }
 }
