@@ -96,9 +96,11 @@
             </x-slot>
         </x-filament::modal>
 
+        @if ($record->default_ssh_user)
         <x-filament::button class="deactivate" wire:click="shutdownAll">
             Desligar Laboratório
         </x-filament::button>
+        @endif
     </div>
     @endif
 

@@ -48,6 +48,7 @@ class EditDevice extends EditRecord
                     $execution = $this->deviceService->createExecution($this->record, $sshUser, command: "sudo shutdown -h now");
                     RunSSHExecutionJob::dispatch($execution->id);
                 })
+                ->hidden(fn () => !$this->record?->default_ssh_user),
         ];
     }
 

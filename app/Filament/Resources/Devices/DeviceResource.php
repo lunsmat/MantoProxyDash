@@ -55,6 +55,12 @@ class DeviceResource extends Resource
             ->pluck('username', 'id')
             ->toArray();
 
+        if (empty($sshUsers)) {
+            $sshUsers = [null => 'Nenhum usuário SSH disponível'];
+        } else {
+            $sshUsers = [null => 'Nenhum'] + $sshUsers;
+        }
+
         return $schema
             ->components([
                 TextInput::make('name')
@@ -131,7 +137,7 @@ class DeviceResource extends Resource
                         foreach ($records as $record) {
                             $record->load(['groups', 'filters']);
                             $data = [
-                                'user_id' => auth()->id(),
+                                'user_id' => Auth::user()?->id,
                                 'device_id' => $record->toArray(),
                             ];
                             $service->registerLog($record, "Dispositivo removido", $data);

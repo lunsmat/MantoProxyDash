@@ -48,7 +48,7 @@ class SSHExecutionsResource extends Resource
                 ->required()
                 ->default('command')
                 ->live()
-                ->hidden(fn (Model $record = null) => $record !== null)
+                ->hidden(fn (?Model $record) => $record !== null)
                 ->label('Tipo de Execução'),
             Textarea::make('command')
                 ->label('Comando')
@@ -71,7 +71,7 @@ class SSHExecutionsResource extends Resource
                 ])
                 ->live()
                 ->required()
-                ->hidden(fn (Model $record = null) => $record !== null)
+                ->hidden(fn (?Model $record) => $record !== null)
                 ->default(Device::class),
             Select::make('object_id')
                 ->label('Objeto')
@@ -85,20 +85,20 @@ class SSHExecutionsResource extends Resource
                     return [];
                 })->required()
                 ->searchable()
-                ->hidden(fn (Model $record = null) => $record !== null),
+                ->hidden(fn (?Model $record) => $record !== null),
             Select::make('ssh_user_id')
                 ->label('Usuário SSH')
                 ->options($sshUsers)
                 ->required()
                 ->searchable()
-                ->hidden(fn (Model $record = null) => $record !== null)
+                ->hidden(fn (?Model $record) => $record !== null)
                 ->default(array_key_first($sshUsers)),
             TextArea::make('output')
                 ->label('Output')
                 ->rows(15)
                 ->columnSpanFull()
                 ->disabled()
-                ->hidden(fn (Model $record = null) => $record === null),
+                ->hidden(fn (?Model $record) => $record === null),
         ]);
     }
 
@@ -123,6 +123,11 @@ class SSHExecutionsResource extends Resource
     }
 
     public static function canCreate(): bool
+    {
+        return Auth::user()->is_admin;
+    }
+
+    public static function canAccess(): bool
     {
         return Auth::user()->is_admin;
     }
